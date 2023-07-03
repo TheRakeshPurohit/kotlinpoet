@@ -46,8 +46,8 @@ import kotlin.reflect.KClass
 public class FileSpec private constructor(
   builder: Builder,
   private val tagMap: TagMap = builder.buildTagMap(),
-) : Taggable by tagMap {
-  public val annotations: List<AnnotationSpec> = builder.annotations.toImmutableList()
+) : Taggable by tagMap, Annotatable {
+  override val annotations: List<AnnotationSpec> = builder.annotations.toImmutableList()
   public val comment: CodeBlock = builder.comment.build()
   public val packageName: String = builder.packageName
   public val name: String = builder.name
@@ -230,7 +230,8 @@ public class FileSpec private constructor(
     public val packageName: String,
     public val name: String,
     public val isScript: Boolean,
-  ) : Taggable.Builder<Builder> {
+  ) : Taggable.Builder<Builder>, Annotatable.Builder<Builder> {
+    override val annotations: MutableList<AnnotationSpec> = mutableListOf()
     internal val comment = CodeBlock.builder()
     internal val memberImports = sortedSetOf<Import>()
     internal var indent = DEFAULT_INDENT
@@ -239,7 +240,6 @@ public class FileSpec private constructor(
     public val defaultImports: MutableSet<String> = mutableSetOf()
     public val imports: List<Import> get() = memberImports.toList()
     public val members: MutableList<Any> = mutableListOf()
-    public val annotations: MutableList<AnnotationSpec> = mutableListOf()
     internal val body = CodeBlock.builder()
 
     /**
@@ -248,7 +248,7 @@ public class FileSpec private constructor(
      * The annotation must either have a [`file` use-site target][AnnotationSpec.UseSiteTarget.FILE]
      * or not have a use-site target specified (in which case it will be changed to `file`).
      */
-    public fun addAnnotation(annotationSpec: AnnotationSpec): Builder = apply {
+    override fun addAnnotation(annotationSpec: AnnotationSpec): Builder = apply {
       val spec = when (annotationSpec.useSiteTarget) {
         FILE -> annotationSpec
         null -> annotationSpec.toBuilder().useSiteTarget(FILE).build()
@@ -258,15 +258,6 @@ public class FileSpec private constructor(
       }
       annotations += spec
     }
-
-    public fun addAnnotation(annotation: ClassName): Builder =
-      addAnnotation(AnnotationSpec.builder(annotation).build())
-
-    public fun addAnnotation(annotation: Class<*>): Builder =
-      addAnnotation(annotation.asClassName())
-
-    public fun addAnnotation(annotation: KClass<*>): Builder =
-      addAnnotation(annotation.asClassName())
 
     /** Adds a file-site comment. This is prefixed to the start of the file and different from [addBodyComment]. */
     public fun addFileComment(format: String, vararg args: Any): Builder = apply {
@@ -501,6 +492,24 @@ public class FileSpec private constructor(
       body.clear()
     }
 
+    //region Overrides for binary compatibility
+    @Suppress("RedundantOverride")
+    override fun addAnnotations(annotationSpecs: Iterable<AnnotationSpec>): Builder =
+      super.addAnnotations(annotationSpecs)
+
+    @Suppress("RedundantOverride")
+    override fun addAnnotation(annotation: ClassName): Builder = super.addAnnotation(annotation)
+
+    @DelicateKotlinPoetApi(
+      message = "Java reflection APIs don't give complete information on Kotlin types. Consider " +
+        "using the kotlinpoet-metadata APIs instead.",
+    )
+    override fun addAnnotation(annotation: Class<*>): Builder = super.addAnnotation(annotation)
+
+    @Suppress("RedundantOverride")
+    override fun addAnnotation(annotation: KClass<*>): Builder = super.addAnnotation(annotation)
+    //endregion
+
     public fun build(): FileSpec {
       for (annotationSpec in annotations) {
         if (annotationSpec.useSiteTarget != FILE) {
@@ -525,6 +534,10 @@ public class FileSpec private constructor(
         "nested types can't be used to name a file: ${className.simpleNames.joinToString(".")}"
       }
       return builder(className.packageName, className.simpleName)
+    }
+
+    @JvmStatic public fun builder(memberName: MemberName): Builder {
+      return builder(memberName.packageName, memberName.simpleName)
     }
 
     @JvmStatic public fun builder(packageName: String, fileName: String): Builder =

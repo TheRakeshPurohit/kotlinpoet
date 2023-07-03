@@ -1,6 +1,79 @@
 Change Log
 ==========
 
+## Unreleased
+
+## Version 1.14.2
+
+_2023-05-30_
+
+ * Fix: Fix one more missing API in binary compatibility override in `Annotatable.Builder` (#1581).
+
+## Version 1.14.1
+
+_2023-05-29_
+
+ * Fix: Restore ABI stability for annotatable and documentable builders (#1580).
+
+## Version 1.14.0
+
+_2023-05-29_
+
+Thanks to [@Omico][Omico], [@drawers][drawers], [@RBusarow][RBusarow] for contributing to this release.
+
+ * New: Kotlin 1.8.21.
+ * New: KSP 1.8.21-1.0.11.
+ * New: Enable default methods in Java bytecode (#1561).
+ * New: Group Kotlin and Renovate updates together in Renovate (#1562).
+ * New: Extract trait interface for annotatable constructs and their builders (#1564).
+ * New: Extract trait interface for documentable constructs and their builders (#1571).
+ * New: Document the usage of `STAR` (#1572).
+ * New: Add builder for `FunSpec` which accepts a `MemberName` (#1574).
+ * Fix: Omit public modifier on override function or constructor parameters (#1550).
+ * Fix: Correct handling of members in various types (#1558).
+ * Fix: Function return types now default to `Unit` unless explicitly set (#1559).
+
+    Previously, when `FunSpec` didn't have a return type specified and an expression body was produced, no return
+    type would be emitted. However, starting from `1.14.0`, KotlinPoet will not add `Unit` as a return type in such
+    cases. In order to correct the generated output, you are to specify the actual return type of the `FunSpec`.
+
+    Before `1.14.0`, if omitted, no return type is produced:
+    ```kotlin
+    val funSpec = FunSpec.builder("foo")
+      .addStatement("return 1")
+      .build()
+    ```
+    ```kotlin
+    public fun foo() = 1
+    ```
+
+    From `1.14.0`, the return type defaults to `Unit` if not otherwise set:
+    ```kotlin
+    val funSpec = FunSpec.builder("foo")
+      .addStatement("return 1")
+      .build()
+    ```
+    ```kotlin
+    public fun foo(): Unit = 1 // ❌
+    ```
+
+    To fix it, explicitly define the return type:
+    ```diff
+     val funSpec = FunSpec.builder("foo")
+    +  .returns(INT)
+       .addStatement("return 1")
+       .build()
+    ```
+    ```kotlin
+    public fun foo(): Int = 1 // ✅
+    ```
+
+    Additionally, as part of this change, `FunSpec.returnType` has changed to be non-nullable. This is a source- and
+    binary-compatible change, although if you were performing null-checks then new warnings may appear after upgrade.
+
+ * Fix: Append nested class names to alias during name lookup (#1568).
+ * Fix: Allow PropertySpec with context receivers and without getter or setter (#1575).
+
 ## Version 1.13.2
 
 _2023-05-05_
@@ -641,3 +714,5 @@ _2017-05-16_
  [drawers]: https://github.com/drawers
  [rickclephas]: https://github.com/rickclephas
  [Squiry]: https://github.com/Squiry
+ [Omico]: https://github.com/Omico
+ [RBusarow]: https://github.com/RBusarow

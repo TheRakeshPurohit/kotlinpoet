@@ -25,6 +25,7 @@ import com.squareup.kotlinpoet.KModifier.INNER
 import com.squareup.kotlinpoet.KModifier.INTERNAL
 import com.squareup.kotlinpoet.KModifier.PRIVATE
 import com.squareup.kotlinpoet.KModifier.PUBLIC
+import com.squareup.kotlinpoet.KModifier.SEALED
 import com.squareup.kotlinpoet.KModifier.VARARG
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.jvm.throws
@@ -169,13 +170,11 @@ class TypeSpecTest {
       """
         |package com.squareup.tacos
         |
-        |import kotlin.Unit
-        |
         |public class Taco {
         |  public val NAME: Thing.Thang<Foo, Bar> = object : Thing.Thang<Foo, Bar>() {
         |    public override fun call(thung: Thung<in Foo>): Thung<in Bar> = object : SimpleThung<Bar>(thung)
         |        {
-        |      public override fun doSomething(bar: Bar): Unit {
+        |      public override fun doSomething(bar: Bar) {
         |        /* code snippets */
         |      }
         |    }
@@ -240,11 +239,10 @@ class TypeSpecTest {
         |
         |import com.squareup.wire.Message
         |import java.lang.Runnable
-        |import kotlin.Unit
         |
         |public class Taco {
         |  public val NAME: Runnable = object : Message(), Runnable {
-        |    public override fun run(): Unit {
+        |    public override fun run() {
         |      /* code snippets */
         |    }
         |  }
@@ -622,16 +620,14 @@ class TypeSpecTest {
       """
         |package com.squareup.tacos
         |
-        |import kotlin.Unit
-        |
         |public enum class Tortilla {
         |  CORN {
-        |    public override fun fold(): Unit {
+        |    public override fun fold() {
         |    }
         |  },
         |  ;
         |
-        |  public abstract fun fold(): Unit
+        |  public abstract fun fold()
         |}
         |
       """.trimMargin(),
@@ -701,12 +697,11 @@ class TypeSpecTest {
         |package com.squareup.tacos
         |
         |import kotlin.String
-        |import kotlin.Unit
         |
         |public sealed class Sealed {
         |  public abstract val name: String
         |
-        |  public abstract fun fold(): Unit
+        |  public abstract fun fold()
         |}
         |
       """.trimMargin(),
@@ -926,26 +921,25 @@ class TypeSpecTest {
         |package com.squareup.tacos
         |
         |import java.io.IOException
-        |import kotlin.Unit
         |import kotlin.jvm.Throws
         |
         |public abstract class Taco {
         |  @Throws(IOException::class)
-        |  public fun throwOne(): Unit {
+        |  public fun throwOne() {
         |  }
         |
         |  @Throws(
         |    IOException::class,
         |    SourCreamException::class,
         |  )
-        |  public fun throwTwo(): Unit {
+        |  public fun throwTwo() {
         |  }
         |
         |  @Throws(IOException::class)
-        |  public abstract fun abstractThrow(): Unit
+        |  public abstract fun abstractThrow()
         |
         |  @Throws(IOException::class)
-        |  public external fun nativeThrow(): Unit
+        |  public external fun nativeThrow()
         |}
         |
       """.trimMargin(),
@@ -1208,12 +1202,10 @@ class TypeSpecTest {
       """
         |package com.squareup.tacos
         |
-        |import kotlin.Unit
-        |
         |public fun interface Taco {
-        |  public fun sam(): Unit
+        |  public fun sam()
         |
-        |  public fun notSam(): Unit {
+        |  public fun notSam() {
         |  }
         |}
         |
@@ -1479,7 +1471,8 @@ class TypeSpecTest {
   }
 
   @Test fun expectClass() {
-    val classA = TypeSpec.expectClassBuilder("ClassA")
+    val classA = TypeSpec.classBuilder("ClassA")
+      .addModifiers(KModifier.EXPECT)
       .addFunction(
         FunSpec.builder("test")
           .build(),
@@ -1489,7 +1482,7 @@ class TypeSpecTest {
     assertThat(classA.toString()).isEqualTo(
       """
       |public expect class ClassA {
-      |  public fun test(): kotlin.Unit
+      |  public fun test()
       |}
       |
       """.trimMargin(),
@@ -1497,7 +1490,8 @@ class TypeSpecTest {
   }
 
   @Test fun nestedExpectCompanionObjectWithFunction() {
-    val classA = TypeSpec.expectClassBuilder("ClassA")
+    val classA = TypeSpec.classBuilder("ClassA")
+      .addModifiers(KModifier.EXPECT)
       .addType(
         TypeSpec.companionObjectBuilder()
           .addFunction(
@@ -1512,7 +1506,7 @@ class TypeSpecTest {
       """
       |public expect class ClassA {
       |  public companion object {
-      |    public fun test(): kotlin.Unit
+      |    public fun test()
       |  }
       |}
       |
@@ -1521,7 +1515,8 @@ class TypeSpecTest {
   }
 
   @Test fun nestedExpectClassWithFunction() {
-    val classA = TypeSpec.expectClassBuilder("ClassA")
+    val classA = TypeSpec.classBuilder("ClassA")
+      .addModifiers(KModifier.EXPECT)
       .addType(
         TypeSpec.classBuilder("ClassB")
           .addFunction(
@@ -1536,7 +1531,7 @@ class TypeSpecTest {
       """
       |public expect class ClassA {
       |  public class ClassB {
-      |    public fun test(): kotlin.Unit
+      |    public fun test()
       |  }
       |}
       |
@@ -1545,7 +1540,8 @@ class TypeSpecTest {
   }
 
   @Test fun deeplyNestedExpectClassWithFunction() {
-    val classA = TypeSpec.expectClassBuilder("ClassA")
+    val classA = TypeSpec.classBuilder("ClassA")
+      .addModifiers(KModifier.EXPECT)
       .addType(
         TypeSpec.classBuilder("ClassB")
           .addType(
@@ -1565,7 +1561,7 @@ class TypeSpecTest {
       |public expect class ClassA {
       |  public class ClassB {
       |    public class ClassC {
-      |      public fun test(): kotlin.Unit
+      |      public fun test()
       |    }
       |  }
       |}
@@ -1575,7 +1571,8 @@ class TypeSpecTest {
   }
 
   @Test fun veryDeeplyNestedExpectClassWithFunction() {
-    val classA = TypeSpec.expectClassBuilder("ClassA")
+    val classA = TypeSpec.classBuilder("ClassA")
+      .addModifiers(KModifier.EXPECT)
       .addType(
         TypeSpec.classBuilder("ClassB")
           .addType(
@@ -1600,7 +1597,7 @@ class TypeSpecTest {
       |  public class ClassB {
       |    public class ClassC {
       |      public class ClassD {
-      |        public fun test(): kotlin.Unit
+      |        public fun test()
       |      }
       |    }
       |  }
@@ -1611,7 +1608,8 @@ class TypeSpecTest {
   }
 
   @Test fun deeplyNestedExpectClassWithConstructor() {
-    val classA = TypeSpec.expectClassBuilder("ClassA")
+    val classA = TypeSpec.classBuilder("ClassA")
+      .addModifiers(KModifier.EXPECT)
       .addType(
         TypeSpec.classBuilder("ClassB")
           .addType(
@@ -1641,7 +1639,8 @@ class TypeSpecTest {
   }
 
   @Test fun veryDeeplyNestedExpectClassWithConstructor() {
-    val classA = TypeSpec.expectClassBuilder("ClassA")
+    val classA = TypeSpec.classBuilder("ClassA")
+      .addModifiers(KModifier.EXPECT)
       .addType(
         TypeSpec.classBuilder("ClassB")
           .addType(
@@ -1695,15 +1694,13 @@ class TypeSpecTest {
       """
         |package com.squareup.tacos
         |
-        |import kotlin.Unit
-        |
         |public interface Taco {
-        |  public fun aMethod(): Unit
+        |  public fun aMethod()
         |
-        |  public fun aDefaultMethod(): Unit {
+        |  public fun aDefaultMethod() {
         |  }
         |
-        |  private fun aPrivateMethod(): Unit {
+        |  private fun aPrivateMethod() {
         |  }
         |}
         |
@@ -1891,7 +1888,6 @@ class TypeSpecTest {
         |
         |import java.util.Locale
         |import kotlin.Boolean
-        |import kotlin.Unit
         |
         |/**
         | * A hard or soft tortilla, loosely folded and filled with whatever
@@ -1909,7 +1905,7 @@ class TypeSpecTest {
         |   *
         |   * For [Locale#KOREAN], the front may also be folded.
         |   */
-        |  public fun refold(locale: Locale): Unit {
+        |  public fun refold(locale: Locale) {
         |  }
         |}
         |
@@ -2056,10 +2052,9 @@ class TypeSpecTest {
         |
         |import java.lang.Runnable
         |import kotlin.Int
-        |import kotlin.Unit
         |
         |public class Taqueria {
-        |  public fun prepare(workers: Int, vararg jobs: Runnable): Unit {
+        |  public fun prepare(workers: Int, vararg jobs: Runnable) {
         |  }
         |}
         |
@@ -2084,14 +2079,13 @@ class TypeSpecTest {
         |import java.lang.Runnable
         |import kotlin.Boolean
         |import kotlin.Int
-        |import kotlin.Unit
         |
         |public class Taqueria {
         |  public fun prepare(
         |    workers: Int,
         |    vararg jobs: Runnable,
         |    start: Boolean,
-        |  ): Unit {
+        |  ) {
         |  }
         |}
         |
@@ -2193,10 +2187,9 @@ class TypeSpecTest {
         |package com.squareup.tacos
         |
         |import java.lang.System
-        |import kotlin.Unit
         |
         |public class Taco {
-        |  public fun choices(): Unit {
+        |  public fun choices() {
         |    if (taco != null || taco == otherTaco) {
         |      System.out.println("only one taco? NOO!")
         |    } else if (taco.isSupreme() && otherTaco.isSupreme()) {
@@ -2226,10 +2219,9 @@ class TypeSpecTest {
         |package com.squareup.tacos
         |
         |import java.lang.System
-        |import kotlin.Unit
         |
         |public class Taco {
-        |  public fun choices(): Unit {
+        |  public fun choices() {
         |    if (5 < 4)  {
         |      System.out.println("wat")
         |    } else if (5 < 6) {
@@ -2255,10 +2247,9 @@ class TypeSpecTest {
         |package com.squareup.tacos
         |
         |import java.lang.System
-        |import kotlin.Unit
         |
         |public class Taco {
-        |  public fun inlineIndent(): Unit {
+        |  public fun inlineIndent() {
         |    if (3 < 4) {
         |      System.out.println("hello");
         |    }
@@ -2333,7 +2324,6 @@ class TypeSpecTest {
         |import kotlin.Int
         |import kotlin.Long
         |import kotlin.String
-        |import kotlin.Unit
         |
         |public class Members {
         |  public val W: String
@@ -2344,16 +2334,16 @@ class TypeSpecTest {
         |
         |  public constructor(o: Long)
         |
-        |  public fun T(): Unit {
+        |  public fun T() {
         |  }
         |
-        |  public fun S(): Unit {
+        |  public fun S() {
         |  }
         |
-        |  public fun R(): Unit {
+        |  public fun R() {
         |  }
         |
-        |  public fun Q(): Unit {
+        |  public fun Q() {
         |  }
         |
         |  public class Z
@@ -2486,7 +2476,7 @@ class TypeSpecTest {
     assertThat(type.toString()).isEqualTo(
       """
         |object : java.lang.Runnable {
-        |  public override fun run(): kotlin.Unit {
+        |  public override fun run() {
         |  }
         |}
       """.trimMargin(),
@@ -2599,7 +2589,6 @@ class TypeSpecTest {
         |import java.util.Comparator
         |import kotlin.Int
         |import kotlin.String
-        |import kotlin.Unit
         |import kotlin.collections.List
         |
         |public class Taco {
@@ -2614,7 +2603,7 @@ class TypeSpecTest {
         |    }
         |  }
         |
-        |  public fun sortPrefix(list: List<String>, length: Int): Unit {
+        |  public fun sortPrefix(list: List<String>, length: Int) {
         |    Collections.sort(
         |        list,
         |        object : Comparator<String> {
@@ -2832,10 +2821,8 @@ class TypeSpecTest {
       """
         |package com.squareup.tacos
         |
-        |import kotlin.Unit
-        |
         |public class Taco {
-        |  public fun addTopping(topping: Topping): Unit {
+        |  public fun addTopping(topping: Topping) {
         |    try {
         |      /* do something tricky with the topping */
         |    } catch (e: IllegalToppingException) {
@@ -2887,6 +2874,7 @@ class TypeSpecTest {
       .addFunction(
         FunSpec.builder("toppingPrice")
           .addParameter("topping", String::class)
+          .returns(INT)
           .beginControlFlow("return when(topping)")
           .addStatement("%S -> 1", "beef")
           .addStatement("%S -> 2", "lettuce")
@@ -2900,10 +2888,11 @@ class TypeSpecTest {
       """
         |package com.squareup.tacos
         |
+        |import kotlin.Int
         |import kotlin.String
         |
         |public class Taco {
-        |  public fun toppingPrice(topping: String) = when(topping) {
+        |  public fun toppingPrice(topping: String): Int = when(topping) {
         |    "beef" -> 1
         |    "lettuce" -> 2
         |    "cheese" -> 3
@@ -3282,8 +3271,8 @@ class TypeSpecTest {
   }
 
   @Test fun generalExpectClassBuilderEqualityTest() {
-    val expectSpec = TypeSpec.expectClassBuilder("AtmoicRef")
-      .addModifiers(KModifier.INTERNAL)
+    val expectSpec = TypeSpec.classBuilder("AtmoicRef")
+      .addModifiers(KModifier.EXPECT, KModifier.INTERNAL)
       .primaryConstructor(
         FunSpec.constructorBuilder()
           .addParameter("value", Int::class)
@@ -3383,7 +3372,6 @@ class TypeSpecTest {
         |package com.squareup.tacos
         |
         |import kotlin.Int
-        |import kotlin.Unit
         |
         |public object MyObject {
         |  public val tacos: Int
@@ -3391,7 +3379,7 @@ class TypeSpecTest {
         |  init {
         |  }
         |
-        |  public fun test(): Unit {
+        |  public fun test() {
         |  }
         |}
         |
@@ -3417,13 +3405,12 @@ class TypeSpecTest {
         |package com.squareup.tacos
         |
         |import com.squareup.wire.Message
-        |import kotlin.Unit
         |
         |public object MyObject : Message() {
         |  init {
         |  }
         |
-        |  public fun test(): Unit {
+        |  public fun test() {
         |  }
         |}
         |
@@ -3455,13 +3442,12 @@ class TypeSpecTest {
         |package com.squareup.tacos
         |
         |import kotlin.Int
-        |import kotlin.Unit
         |
         |public class MyClass {
         |  public companion object {
         |    public val tacos: Int = 42
         |
-        |    public fun test(): Unit {
+        |    public fun test() {
         |    }
         |  }
         |}
@@ -3523,11 +3509,9 @@ class TypeSpecTest {
       """
         |package com.squareup.tacos
         |
-        |import kotlin.Unit
-        |
         |public class MyClass {
         |  public companion object Factory {
-        |    public fun tacos(): Unit {
+        |    public fun tacos() {
         |    }
         |  }
         |}
@@ -3554,11 +3538,9 @@ class TypeSpecTest {
       """
         |package com.squareup.tacos
         |
-        |import kotlin.Unit
-        |
         |public interface MyInterface {
         |  public companion object {
-        |    public fun test(): Unit {
+        |    public fun test() {
         |    }
         |  }
         |}
@@ -3587,15 +3569,13 @@ class TypeSpecTest {
       """
         |package com.squareup.tacos
         |
-        |import kotlin.Unit
-        |
         |public enum class MyEnum {
         |  FOO,
         |  BAR,
         |  ;
         |
         |  public companion object {
-        |    public fun test(): Unit {
+        |    public fun test() {
         |    }
         |  }
         |}
@@ -3643,11 +3623,10 @@ class TypeSpecTest {
         |package com.squareup.tacos
         |
         |import com.squareup.wire.Message
-        |import kotlin.Unit
         |
         |public class MyClass {
         |  public companion object : Message() {
-        |    public fun test(): Unit {
+        |    public fun test() {
         |    }
         |  }
         |}
@@ -4074,28 +4053,58 @@ class TypeSpecTest {
     }.hasMessageThat().isEqualTo("modifiers [ABSTRACT, PRIVATE] must contain none or only one of [ABSTRACT, PRIVATE]")
   }
 
-  @Test fun internalFunForbiddenInAnnotation() {
+  @Test fun internalConstructorForbiddenInAnnotation() {
+    val type = TypeSpec.annotationBuilder("Taco")
+
+    assertThrows<IllegalArgumentException> {
+      type.primaryConstructor(
+        FunSpec.constructorBuilder()
+          .addModifiers(INTERNAL)
+          .build(),
+      )
+        .build()
+    }.hasMessageThat().isEqualTo("modifiers [INTERNAL] must contain none of [INTERNAL, PROTECTED, PRIVATE, ABSTRACT]")
+  }
+
+  // https://github.com/square/kotlinpoet/issues/1557
+  @Test fun memberFunForbiddenInAnnotation() {
     val type = TypeSpec.annotationBuilder("Taco")
 
     assertThrows<IllegalArgumentException> {
       type.addFunction(
         FunSpec.builder("eat")
-          .addModifiers(INTERNAL)
           .build(),
       )
         .build()
-    }.hasMessageThat().isEqualTo("annotation class Taco.eat requires modifiers [PUBLIC, ABSTRACT]")
+    }.hasMessageThat().isEqualTo("annotation class Taco cannot declare member function eat")
+  }
+
+  // https://github.com/square/kotlinpoet/issues/1557
+  @Test fun secondaryConstructorForbiddenInAnnotation() {
+    val type = TypeSpec.annotationBuilder("Taco")
 
     assertThrows<IllegalArgumentException> {
-      type.addFunctions(
-        listOf(
-          FunSpec.builder("eat")
-            .addModifiers(INTERNAL)
+      type.primaryConstructor(FunSpec.constructorBuilder().build())
+        .addFunction(
+          FunSpec.constructorBuilder()
+            .addParameter("value", String::class)
             .build(),
-        ),
+        ).build()
+    }.hasMessageThat().isEqualTo("annotation class Taco cannot declare member function constructor()")
+  }
+
+  // https://github.com/square/kotlinpoet/issues/1556
+  @Test fun abstractFunForbiddenInObject() {
+    val type = TypeSpec.objectBuilder("Taco")
+
+    assertThrows<IllegalArgumentException> {
+      type.addFunction(
+        FunSpec.builder("eat")
+          .addModifiers(ABSTRACT)
+          .build(),
       )
         .build()
-    }.hasMessageThat().isEqualTo("annotation class Taco.eat requires modifiers [PUBLIC, ABSTRACT]")
+    }.hasMessageThat().isEqualTo("non-abstract type Taco cannot declare abstract function eat")
   }
 
   @Test fun classHeaderFormatting() {
@@ -4218,10 +4227,9 @@ class TypeSpecTest {
         |package com.squareup.tacos
         |
         |import kotlin.String
-        |import kotlin.Unit
         |
         |public class Taco {
-        |  public fun shell(): Unit {
+        |  public fun shell() {
         |    val taco1: String = "Taco!"
         |    val taco2: String? = null
         |    lateinit var taco3: String
@@ -4423,10 +4431,8 @@ class TypeSpecTest {
       """
       |package com.squareup.tacos
       |
-      |import kotlin.Unit
-      |
       |public external class Foo {
-      |  public fun bar(): Unit
+      |  public fun bar()
       |}
       |
       """.trimMargin(),
@@ -4445,12 +4451,11 @@ class TypeSpecTest {
       |package com.squareup.tacos
       |
       |import kotlin.String
-      |import kotlin.Unit
       |
       |public external interface Foo {
       |  public val baz: String
       |
-      |  public fun bar(): Unit
+      |  public fun bar()
       |}
       |
       """.trimMargin(),
@@ -4469,12 +4474,11 @@ class TypeSpecTest {
       |package com.squareup.tacos
       |
       |import kotlin.String
-      |import kotlin.Unit
       |
       |public external object Foo {
       |  public val baz: String
       |
-      |  public fun bar(): Unit
+      |  public fun bar()
       |}
       |
       """.trimMargin(),
@@ -4508,19 +4512,17 @@ class TypeSpecTest {
       """
       |package com.squareup.tacos
       |
-      |import kotlin.Unit
-      |
       |public external class Foo {
       |  public class Nested1 {
-      |    public fun baz(): Unit
+      |    public fun baz()
       |
       |    public object Nested2 {
-      |      public fun bar(): Unit
+      |      public fun bar()
       |    }
       |  }
       |
       |  public companion object {
-      |    public fun qux(): Unit
+      |    public fun qux()
       |  }
       |}
       |
@@ -4625,10 +4627,10 @@ class TypeSpecTest {
     val javaWord = AnnotationSpec.builder(JvmName::class.asClassName())
       .addMember("name = %S", "javaWord")
       .build()
-    builder.annotationSpecs.clear()
-    builder.annotationSpecs.add(javaWord)
+    builder.annotations.clear()
+    builder.annotations.add(javaWord)
 
-    assertThat(builder.build().annotationSpecs).containsExactly(javaWord)
+    assertThat(builder.build().annotations).containsExactly(javaWord)
   }
 
   @Test fun modifyTypeVariableNames() {
@@ -5138,7 +5140,7 @@ class TypeSpecTest {
       .build()
     assertThat(funSpec.toString()).isEqualTo(
       """
-      |public fun printTaco(taco: com.squareup.tacos.Taco.`object`): kotlin.Unit {
+      |public fun printTaco(taco: com.squareup.tacos.Taco.`object`) {
       |  print(taco)
       |}
       |
@@ -5182,7 +5184,6 @@ class TypeSpecTest {
       package com.squareup.tacos
 
       import kotlin.String
-      import kotlin.Unit
 
       public interface Taco {
         public val foo: String
@@ -5191,7 +5192,7 @@ class TypeSpecTest {
 
         public fun bar(): String
 
-        public fun barWithDefault(): Unit {
+        public fun barWithDefault() {
         }
       }
 
@@ -5349,7 +5350,7 @@ class TypeSpecTest {
     assertThat(baseClass.toString()).isEqualTo(
       """
       |public abstract class Base {
-      |  internal abstract fun foo(): kotlin.Unit
+      |  internal abstract fun foo()
       |}
       |
       """.trimMargin(),
@@ -5367,7 +5368,7 @@ class TypeSpecTest {
     assertThat(exampleClass.toString()).isEqualTo(
       """
       |public class Example : Base() {
-      |  override fun foo(): kotlin.Unit {
+      |  override fun foo() {
       |  }
       |}
       |
@@ -5387,7 +5388,7 @@ class TypeSpecTest {
     assertThat(example2Class.toString()).isEqualTo(
       """
       |public class Example2 : Base() {
-      |  public override fun foo(): kotlin.Unit {
+      |  public override fun foo() {
       |  }
       |}
       |
@@ -5407,7 +5408,7 @@ class TypeSpecTest {
     assertThat(example3Class.toString()).isEqualTo(
       """
       |internal class Example3 : Base() {
-      |  public override fun foo(): kotlin.Unit {
+      |  public override fun foo() {
       |  }
       |}
       |
@@ -5435,6 +5436,181 @@ class TypeSpecTest {
         .contextReceivers(STRING)
     }
     assertThat(t).hasMessageThat().contains("contextReceivers can only be applied on simple classes")
+  }
+
+  @Test fun valWithContextReceiverWithoutGetter() {
+    assertThrows<IllegalArgumentException> {
+      TypeSpec.classBuilder("Example")
+        .addProperty(
+          PropertySpec.builder("foo", STRING)
+            .mutable(false)
+            .contextReceivers(INT)
+            .build(),
+        )
+        .build()
+    }.hasMessageThat()
+      .isEqualTo("non-abstract properties with context receivers require a get()")
+  }
+
+  @Test fun varWithContextReceiverWithoutAccessors() {
+    assertThrows<IllegalArgumentException> {
+      TypeSpec.classBuilder("Example")
+        .addProperty(
+          PropertySpec.builder("foo", STRING)
+            .mutable()
+            .contextReceivers(INT)
+            .getter(
+              FunSpec.getterBuilder()
+                .build(),
+            )
+            .build(),
+        ).build()
+    }.hasMessageThat()
+      .isEqualTo("non-abstract mutable properties with context receivers require a set()")
+
+    assertThrows<IllegalArgumentException> {
+      TypeSpec.classBuilder("Example")
+        .addProperty(
+          PropertySpec.builder("foo", STRING)
+            .mutable()
+            .contextReceivers(INT)
+            .setter(
+              FunSpec.setterBuilder()
+                .build(),
+            )
+            .build(),
+        ).build()
+    }.hasMessageThat()
+      .isEqualTo("non-abstract properties with context receivers require a get()")
+  }
+
+  // https://github.com/square/kotlinpoet/issues/1525
+  @Test fun propertyWithContextReceiverInInterface() {
+    val typeSpec = TypeSpec.interfaceBuilder("Bar")
+      .addProperty(
+        PropertySpec.builder("foo", Int::class)
+          .contextReceivers(STRING)
+          .build(),
+      )
+      .addProperty(
+        PropertySpec.builder("bar", Int::class)
+          .contextReceivers(STRING)
+          .mutable(true)
+          .build(),
+      )
+      .build()
+
+    assertThat(typeSpec.toString()).isEqualTo(
+      """
+      |public interface Bar {
+      |  context(kotlin.String)
+      |  public val foo: kotlin.Int
+      |
+      |  context(kotlin.String)
+      |  public var bar: kotlin.Int
+      |}
+      |
+      """.trimMargin(),
+    )
+  }
+
+  @Test fun nonAbstractPropertyWithContextReceiverInAbstractClass() {
+    assertThrows<IllegalArgumentException> {
+      TypeSpec.classBuilder("Bar")
+        .addModifiers(ABSTRACT)
+        .addProperty(
+          PropertySpec.builder("foo", Int::class)
+            .contextReceivers(STRING)
+            .build(),
+        )
+        .build()
+    }.hasMessageThat().isEqualTo("non-abstract properties with context receivers require a get()")
+  }
+
+  @Test fun abstractPropertyWithContextReceiverInAbstractClass() {
+    val typeSpec = TypeSpec.classBuilder("Bar")
+      .addModifiers(ABSTRACT)
+      .addProperty(
+        PropertySpec.builder("foo", Int::class)
+          .contextReceivers(STRING)
+          .addModifiers(ABSTRACT)
+          .build(),
+      )
+      .build()
+
+    assertThat(typeSpec.toString()).isEqualTo(
+      """
+      |public abstract class Bar {
+      |  context(kotlin.String)
+      |  public abstract val foo: kotlin.Int
+      |}
+      |
+      """.trimMargin(),
+    )
+  }
+
+  @Test fun abstractPropertyInNonAbstractClass() {
+    assertThrows<IllegalArgumentException> {
+      TypeSpec.classBuilder("Bar")
+        .addProperty(
+          PropertySpec.builder("foo", Int::class)
+            .addModifiers(ABSTRACT)
+            .build(),
+        )
+        .build()
+    }.hasMessageThat().isEqualTo("non-abstract type Bar cannot declare abstract property foo")
+  }
+
+  @Test fun abstractPropertyInObject() {
+    assertThrows<IllegalArgumentException> {
+      TypeSpec.objectBuilder("Bar")
+        .addProperty(
+          PropertySpec.builder("foo", Int::class)
+            .addModifiers(ABSTRACT)
+            .build(),
+        )
+        .build()
+    }.hasMessageThat().isEqualTo("non-abstract type Bar cannot declare abstract property foo")
+  }
+
+  @Test fun abstractPropertyInEnum() {
+    val typeSpec = TypeSpec.enumBuilder("Bar")
+      .addProperty(
+        PropertySpec.builder("foo", Int::class)
+          .addModifiers(ABSTRACT)
+          .build(),
+      )
+      .build()
+
+    assertThat(typeSpec.toString()).isEqualTo(
+      """
+      |public enum class Bar {
+      |  ;
+      |  public abstract val foo: kotlin.Int
+      |}
+      |
+      """.trimMargin(),
+    )
+  }
+
+  @Test fun abstractPropertyInSealedClass() {
+    val typeSpec = TypeSpec.classBuilder("Bar")
+      .addModifiers(SEALED)
+      .addProperty(
+        PropertySpec.builder("foo", Int::class)
+          .addModifiers(ABSTRACT)
+          .build(),
+      )
+      .build()
+
+    assertThat(typeSpec.toString()).isEqualTo(
+      """
+      |public sealed class Bar {
+      |  public abstract val foo: kotlin.Int
+      |}
+      |
+      """.trimMargin(),
+    )
   }
 
   companion object {

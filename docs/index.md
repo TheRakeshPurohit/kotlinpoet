@@ -315,6 +315,7 @@ KotlinPoet has classes for building each of these:
 
 ```kotlin
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.STAR
 
 val hoverboard = ClassName("com.mattel", "Hoverboard")
 val list = ClassName("kotlin.collections", "List")
@@ -339,7 +340,14 @@ val printThings = FunSpec.builder("printThings")
   .addParameter("things", producerArrayOfThings)
   .addStatement("println(things)")
   .build()
+
+val printKClass = FunSpec.builder("printKClass")
+  .addParameter("kClass", KClass::class.asClassName().parameterizedBy(STAR))
+  .addStatement("println(kClass)")
+  .build()
 ```
+
+The `STAR` is represented as `*` in KotlinPoet. You can find more in the [KDoc][kdoc].
 
 KotlinPoet will decompose each type and import its components where possible.
 
@@ -351,6 +359,7 @@ import com.misc.Thing
 import kotlin.Array
 import kotlin.collections.ArrayList
 import kotlin.collections.List
+import kotlin.reflect.KClass
 
 class HelloWorld {
   fun beyond(): List<Hoverboard> {
@@ -363,6 +372,10 @@ class HelloWorld {
 
   fun printThings(things: Array<out Thing>) {
     println(things)
+  }
+
+  fun printKClass(kClass: KClass<*>) {
+    println(kClass)
   }
 }
 ```
@@ -781,6 +794,29 @@ fun foo() = (100..10000).map { number -> number * number }.map { number ->
 
 The code is now correct and will compile properly. It still doesn't look perfect - you can play with
 replacing other spaces in the code block with `·` symbols to achieve better formatting.
+
+Another common use case where you'd want to ensure spaces don't wrap is when emitting string literals:
+
+```kotlin
+CodeBlock.of("""println("Class: $className")""")
+```
+
+If `$className` is long, KotlinPoet may wrap the space that precedes it, resulting in broken output:
+
+```kotlin
+println("Class:
+very.long.class.name.Here")
+```
+
+KotlinPoet doesn't know that `"Class: $className"` is, in fact, a string literal, and that the space inside of it
+should never be wrapped. To make sure this case is handled correctly, use the `%S` modifier (as described in
+[%S for Strings](#s-for-strings)):
+
+```kotlin
+CodeBlock.of("""println(%S)""", "Class: $className")
+```
+
+Now the library knows it's dealing with a string literal and can use appropriate line-wrapping rules.
 
 ### Constructors
 

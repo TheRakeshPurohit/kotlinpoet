@@ -13,32 +13,32 @@
 # limitations under the License.
 
 [versions]
-kotlin = "1.8.0"
+kotlin = "1.8.22"
 kct = "0.2.1"
-ksp = "1.8.0-1.0.9"
+ksp = "1.8.22-1.0.11"
 ktlint = "0.48.2"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-dokka = { id = "org.jetbrains.dokka", version = "1.8.10" }
+dokka = { id = "org.jetbrains.dokka", version = "1.8.20" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-spotless = { id = "com.diffplug.spotless", version = "6.18.0" }
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.25.2" }
-kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.12.1" }
+spotless = { id = "com.diffplug.spotless", version = "6.19.0" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.25.3" }
+kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.13.2" }
 
 [libraries]
-autoCommon = { module = "com.google.auto:auto-common", version = "1.2.1" }
-guava = { module = "com.google.guava:guava", version = "31.1-jre" }
+autoCommon = { module = "com.google.auto:auto-common", version = "1.2.2" }
+guava = { module = "com.google.guava:guava", version = "32.1.1-jre" }
 javapoet = "com.squareup:javapoet:1.13.0"
 
-autoService = "com.google.auto.service:auto-service-annotations:1.0.1"
+autoService = "com.google.auto.service:auto-service-annotations:1.1.1"
 autoService-ksp = "dev.zacsweers.autoservice:auto-service-ksp:1.0.0"
 
 kotlin-compilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
 kotlin-annotationProcessingEmbeddable = { module = "org.jetbrains.kotlin:kotlin-annotation-processing-embeddable", version.ref = "kotlin" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
-kotlin-metadata = { module = "org.jetbrains.kotlinx:kotlinx-metadata-jvm", version = "0.6.0" }
+kotlin-metadata = { module = "org.jetbrains.kotlinx:kotlinx-metadata-jvm", version = "0.6.2" }
 
 ksp = { module = "com.google.devtools.ksp:symbol-processing", version.ref = "ksp" }
 ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }

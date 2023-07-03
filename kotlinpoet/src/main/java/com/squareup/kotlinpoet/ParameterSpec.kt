@@ -29,10 +29,10 @@ import kotlin.reflect.KClass
 public class ParameterSpec private constructor(
   builder: Builder,
   private val tagMap: TagMap = builder.buildTagMap(),
-) : Taggable by tagMap {
+) : Taggable by tagMap, Annotatable, Documentable {
   public val name: String = builder.name
-  public val kdoc: CodeBlock = builder.kdoc.build()
-  public val annotations: List<AnnotationSpec> = builder.annotations.toImmutableList()
+  override val kdoc: CodeBlock = builder.kdoc.build()
+  override val annotations: List<AnnotationSpec> = builder.annotations.toImmutableList()
   public val modifiers: Set<KModifier> = builder.modifiers
     .also {
       LinkedHashSet(it).apply {
@@ -96,39 +96,13 @@ public class ParameterSpec private constructor(
   public class Builder internal constructor(
     internal val name: String,
     internal val type: TypeName,
-  ) : Taggable.Builder<Builder> {
+  ) : Taggable.Builder<Builder>, Annotatable.Builder<Builder>, Documentable.Builder<Builder> {
     internal var defaultValue: CodeBlock? = null
 
-    public val kdoc: CodeBlock.Builder = CodeBlock.builder()
-    public val annotations: MutableList<AnnotationSpec> = mutableListOf()
     public val modifiers: MutableList<KModifier> = mutableListOf()
+    override val kdoc: CodeBlock.Builder = CodeBlock.builder()
     override val tags: MutableMap<KClass<*>, Any> = mutableMapOf()
-
-    public fun addKdoc(format: String, vararg args: Any): Builder = apply {
-      kdoc.add(format, *args)
-    }
-
-    public fun addKdoc(block: CodeBlock): Builder = apply {
-      kdoc.add(block)
-    }
-
-    public fun addAnnotations(annotationSpecs: Iterable<AnnotationSpec>): Builder = apply {
-      annotations += annotationSpecs
-    }
-
-    public fun addAnnotation(annotationSpec: AnnotationSpec): Builder = apply {
-      annotations += annotationSpec
-    }
-
-    public fun addAnnotation(annotation: ClassName): Builder = apply {
-      annotations += AnnotationSpec.builder(annotation).build()
-    }
-
-    public fun addAnnotation(annotation: Class<*>): Builder =
-      addAnnotation(annotation.asClassName())
-
-    public fun addAnnotation(annotation: KClass<*>): Builder =
-      addAnnotation(annotation.asClassName())
+    override val annotations: MutableList<AnnotationSpec> = mutableListOf()
 
     public fun addModifiers(vararg modifiers: KModifier): Builder = apply {
       this.modifiers += modifiers
@@ -153,6 +127,33 @@ public class ParameterSpec private constructor(
     public fun defaultValue(codeBlock: CodeBlock?): Builder = apply {
       this.defaultValue = codeBlock
     }
+
+    //region Overrides for binary compatibility
+    @Suppress("RedundantOverride")
+    override fun addAnnotation(annotationSpec: AnnotationSpec): Builder = super.addAnnotation(annotationSpec)
+
+    @Suppress("RedundantOverride")
+    override fun addAnnotations(annotationSpecs: Iterable<AnnotationSpec>): Builder =
+      super.addAnnotations(annotationSpecs)
+
+    @Suppress("RedundantOverride")
+    override fun addAnnotation(annotation: ClassName): Builder = super.addAnnotation(annotation)
+
+    @DelicateKotlinPoetApi(
+      message = "Java reflection APIs don't give complete information on Kotlin types. Consider " +
+        "using the kotlinpoet-metadata APIs instead.",
+    )
+    override fun addAnnotation(annotation: Class<*>): Builder = super.addAnnotation(annotation)
+
+    @Suppress("RedundantOverride")
+    override fun addAnnotation(annotation: KClass<*>): Builder = super.addAnnotation(annotation)
+
+    @Suppress("RedundantOverride")
+    override fun addKdoc(format: String, vararg args: Any): Builder = super.addKdoc(format, *args)
+
+    @Suppress("RedundantOverride")
+    override fun addKdoc(block: CodeBlock): Builder = super.addKdoc(block)
+    //endregion
 
     public fun build(): ParameterSpec = ParameterSpec(this)
   }

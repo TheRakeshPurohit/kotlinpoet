@@ -25,9 +25,9 @@ class CrossplatformTest {
   @Test fun crossplatform() {
     val expectTypeParam = TypeVariableName("V")
     val expectType = "AtomicRef"
-    val expectSpec = TypeSpec.expectClassBuilder(expectType)
+    val expectSpec = TypeSpec.classBuilder(expectType)
       .addTypeVariable(expectTypeParam)
-      .addModifiers(KModifier.INTERNAL)
+      .addModifiers(KModifier.INTERNAL, KModifier.EXPECT)
       .primaryConstructor(
         FunSpec.constructorBuilder()
           .addParameter("value", expectTypeParam)
@@ -72,7 +72,6 @@ class CrossplatformTest {
       """
       |import java.util.concurrent.atomic.AtomicReference
       |import kotlin.Boolean
-      |import kotlin.Unit
       |
       |internal expect class AtomicRef<V>(
       |  `value`: V,
@@ -81,7 +80,7 @@ class CrossplatformTest {
       |
       |  public fun `get`(): V
       |
-      |  public fun `set`(`value`: V): Unit
+      |  public fun `set`(`value`: V)
       |
       |  public fun getAndSet(`value`: V): V
       |
@@ -95,8 +94,8 @@ class CrossplatformTest {
   }
 
   @Test fun expectWithSecondaryConstructors() {
-    val expectSpec = TypeSpec.expectClassBuilder("IoException")
-      .addModifiers(KModifier.OPEN)
+    val expectSpec = TypeSpec.classBuilder("IoException")
+      .addModifiers(KModifier.EXPECT, KModifier.OPEN)
       .superclass(Exception::class)
       .addFunction(FunSpec.constructorBuilder().build())
       .addFunction(
@@ -157,6 +156,7 @@ class CrossplatformTest {
       .addFunction(
         FunSpec.builder("f1")
           .addModifiers(KModifier.ACTUAL)
+          .returns(INT)
           .addStatement("return 1")
           .build(),
       )
@@ -168,7 +168,7 @@ class CrossplatformTest {
       |
       |public expect fun f1(): Int
       |
-      |public actual fun f1() = 1
+      |public actual fun f1(): Int = 1
       |
       """.trimMargin(),
     )
@@ -176,14 +176,16 @@ class CrossplatformTest {
 
   @Test fun initBlockInExpectForbidden() {
     assertThrows<IllegalStateException> {
-      TypeSpec.expectClassBuilder("AtomicRef")
+      TypeSpec.classBuilder("AtomicRef")
+        .addModifiers(KModifier.EXPECT)
         .addInitializerBlock(CodeBlock.of("println()"))
     }.hasMessageThat().isEqualTo("expect CLASS can't have initializer blocks")
   }
 
   @Test fun expectFunctionBodyForbidden() {
     assertThrows<IllegalArgumentException> {
-      TypeSpec.expectClassBuilder("AtomicRef")
+      TypeSpec.classBuilder("AtomicRef")
+        .addModifiers(KModifier.EXPECT)
         .addFunction(
           FunSpec.builder("print")
             .addStatement("println()")
@@ -195,7 +197,8 @@ class CrossplatformTest {
 
   @Test fun expectPropertyInitializerForbidden() {
     assertThrows<IllegalArgumentException> {
-      TypeSpec.expectClassBuilder("AtomicRef")
+      TypeSpec.classBuilder("AtomicRef")
+        .addModifiers(KModifier.EXPECT)
         .addProperty(
           PropertySpec.builder("a", Boolean::class)
             .initializer("true")
@@ -206,7 +209,8 @@ class CrossplatformTest {
 
   @Test fun expectPropertyGetterForbidden() {
     assertThrows<IllegalArgumentException> {
-      TypeSpec.expectClassBuilder("AtomicRef")
+      TypeSpec.classBuilder("AtomicRef")
+        .addModifiers(KModifier.EXPECT)
         .addProperty(
           PropertySpec.builder("a", Boolean::class)
             .getter(
@@ -221,7 +225,8 @@ class CrossplatformTest {
 
   @Test fun expectPropertySetterForbidden() {
     assertThrows<IllegalArgumentException> {
-      TypeSpec.expectClassBuilder("AtomicRef")
+      TypeSpec.classBuilder("AtomicRef")
+        .addModifiers(KModifier.EXPECT)
         .addProperty(
           PropertySpec.builder("a", Boolean::class)
             .mutable()
